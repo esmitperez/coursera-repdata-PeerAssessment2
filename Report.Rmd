@@ -1,5 +1,5 @@
 ---
-title: "Health and economic impact analysis of events in NOAA Storm Database"
+title: "Health and economic impact analysis of events reported in U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database"
 author: "Esmit Pérez"
 date: "February 18, 2015"
 output: html_document
@@ -24,7 +24,8 @@ The following data analysis addresses the following questions:
 
 #Data Processing
 
-```{r dataload, cache=TRUE}
+
+```{r dataload, cache=TRUE, results='hide'}
 
 #Obtain and prepare data files
 
@@ -48,18 +49,32 @@ if (!exists("projectData")){
 }
 ```
 
-```{r data cleanups}
-#https://class.coursera.org/repdata-011/forum/thread?thread_id=39
-library(plyr)
-totalDamagePopulation <- ddply(projectData, .(EVTYPE), summarize, totalInjuriesOrDeaths=sum(INJURIES+FATALITIES, na.rm=TRUE))
-totalDamagePopulation[order(totalDamagePopulation$EVTYPE,totalDamagePopulation$totalInjuriesOrDeaths),]
+Property damage calculation rules are derived from the course forum thread ["How to interpret characters used to signify Property Damage magnitude (PROPDMGEXP)?"]("https://class.coursera.org/repdata-011/forum/thread?thread_id=39") 
 
+```{r data cleanups}
+library(plyr)
+#1
+totalDamagePopulation <- ddply(projectData, .(EVTYPE), summarize, totalInjuriesOrDeaths=sum(INJURIES+FATALITIES, na.rm=TRUE))
+
+#totalDamagePopulation[order(totalDamagePopulation$EVTYPE,totalDamagePopulation$totalInjuriesOrDeaths),]
+
+#2
 totalDamageProperty <- ddply(projectData, .(EVTYPE, PROPDMGEXP), summarize, totalPropDmg=sum(PROPDMG, na.rm = TRUE))
-totalDamageProperty[order(totalDamageProperty$totalPropDmg),]
+#totalDamageProperty[order(totalDamageProperty$totalPropDmg),]
 
 ```
 
 
 #Analysis
 
+Population injuries and deaths occur very frequently in small numbers, an analysis of the distribution shows that most injuries happen ONLY in the 99th quantile and above.
+
+```{r quantile-analysis}
+qsToPlot <- c(0.5, 0.7, 0.8, 0.9, .99, .999,.9999,.99999)
+qs <- quantile(totalDamagePopulation$totalInjuriesOrDeaths, probs = qsToPlot)
+qqplot(x=qsToPlot, y=qs)
+lines(x = qsToPlot, y = qs)
+```
+
 #Results
+
