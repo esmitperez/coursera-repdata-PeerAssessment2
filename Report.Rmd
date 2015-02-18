@@ -64,7 +64,6 @@ totalDamageProperty <- ddply(projectData, .(EVTYPE, PROPDMGEXP), summarize, tota
 
 ```
 
-
 #Analysis
 
 Population injuries and deaths occur very frequently in small numbers, an analysis of the distribution shows that most injuries happen ONLY in the 99th quantile and above.
